@@ -3,7 +3,7 @@ from django.urls import resolve
 from django.http import HttpRequest
 
 from lists.views import home_page
-from lists.models import Item
+from lists.models import Item, List
 
 class HomePageTest(TestCase):
 
@@ -12,16 +12,24 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'home.html')
 
 
-class ItemModelTest(TestCase):
+class ListAndItemModelTest(TestCase):
 
     def test_saving_and_retrieving_items(self):
+        list_ = List()
+        list_.save()
+
         firstItem = Item()
         firstItem.text = 'The first list item'
+        firstItem.list = list_
         firstItem.save()
 
         secondItem = Item()
         secondItem.text = 'Item the second'
+        secondItem.list = list_
         secondItem.save()
+
+        savedList = List.objects.first()
+        self.assertEqual(savedList, list_)
 
         savedItems = Item.objects.all()
         self.assertEqual(savedItems.count(), 2)
@@ -29,14 +37,17 @@ class ItemModelTest(TestCase):
         firstSavedItem = savedItems[0]
         secondSavedItem = savedItems[1]
         self.assertEqual(firstSavedItem.text, 'The first list item')
+        self.assertEqual(firstSavedItem.list, list_)
         self.assertEqual(secondSavedItem.text, 'Item the second')
+        self.assertEqual(secondSavedItem.list, list_)
 
 
 class ListViewTest(TestCase):
 
     def test_displays_all_items(self):
-        Item.objects.create(text='itemey 1')
-        Item.objects.create(text='itemey 2')
+        list_ = List.objects.create()
+        Item.objects.create(text='itemey 1', list=list_)
+        Item.objects.create(text='itemey 2', list=list_)
 
         response = self.client.get('/lists/onlylist/')
 
