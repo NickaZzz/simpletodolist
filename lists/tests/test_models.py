@@ -6,32 +6,16 @@ from lists.models import Item, List
 
 class ListAndItemModelTest(TestCase):
 
-    def test_saving_and_retrieving_items(self):
-        list_ = List()
-        list_.save()
+    def test_default_text(self):
+        item = Item()
+        self.assertEqual(item.text, '')
 
-        firstItem = Item()
-        firstItem.text = 'The first list item'
-        firstItem.list = list_
-        firstItem.save()
-
-        secondItem = Item()
-        secondItem.text = 'Item the second'
-        secondItem.list = list_
-        secondItem.save()
-
-        savedList = List.objects.first()
-        self.assertEqual(savedList, list_)
-
-        savedItems = Item.objects.all()
-        self.assertEqual(savedItems.count(), 2)
-
-        firstSavedItem = savedItems[0]
-        secondSavedItem = savedItems[1]
-        self.assertEqual(firstSavedItem.text, 'The first list item')
-        self.assertEqual(firstSavedItem.list, list_)
-        self.assertEqual(secondSavedItem.text, 'Item the second')
-        self.assertEqual(secondSavedItem.list, list_)
+    def test_item_is_related_to_list(self):
+        list_ = List.objects.create()
+        item = Item()
+        item.list = list_
+        item.save()
+        self.assertIn(item, list_.item_set.all())
 
     def test_cannot_save_empty_list_items(self):
         list_ = List.objects.create()
@@ -39,6 +23,23 @@ class ListAndItemModelTest(TestCase):
         with self.assertRaises(ValidationError):
             item.save()
             item.full_clean()
+
+    def test_duplicate_items_are_invalid(self):
+        list_ = List.objects.create()
+        Item.objects.create(list=list_, text="bla")
+        with self.assertRaises(ValidationError):
+            item = Item(list=list_, text='bla')
+            item.full_clean()
+
+    def test_can_save_same_item_to_different_lists(self):
+        list1 = List.objects.create()
+        list2 = List.objects.create()
+        Item.objects.create(list=list1, text='bla')
+        item = Item(list=list2, text='bla')
+        item.full_clean()   # Should not raise an exception
+
+    
+class ListModelTest(TestCase):
 
     def test_get_absolute_url(self):
         list_ = List.objects.create()
