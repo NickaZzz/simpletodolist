@@ -18,6 +18,7 @@
 
 * см. gunicorn-systemd.template.service
 * заменить SITENAME на свой домен
+* заменить YOURPASSWORD почтовым паролем
 
 ## Структура папок:
 

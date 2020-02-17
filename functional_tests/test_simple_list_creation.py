@@ -43,11 +43,7 @@ class NewVisitorTest(FunctionalTest):
     def test_multiple_users_can_start_lists_at_different_urls(self):
         # Эдит начинает новый список
         self.browser.get(self.live_server_url)
-        inputbox = self.get_item_input_box()
-        inputbox.send_keys("Купить павлиньи перья")
-        inputbox.send_keys(Keys.ENTER)
-
-        self.wait_for_row_in_list_table("1: Купить павлиньи перья")
+        self.add_list_item("Купить павлиньи перья")
 
         #Она замечает, что её список имеет уникальный URL
         edith_list_url = self.browser.current_url
@@ -68,10 +64,7 @@ class NewVisitorTest(FunctionalTest):
 
         # Фрэнсис начинает новый список, вводя новый элемент. Он менее
         # интересен, чем список Эдит
-        inputbox = self.get_item_input_box()
-        inputbox.send_keys('Купить молоко')
-        inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table("1: Купить молоко")
+        self.add_list_item('Купить молоко')
 
         # Фрэнсис получает уникальный URL-адрес
         francis_list_url = self.browser.current_url
